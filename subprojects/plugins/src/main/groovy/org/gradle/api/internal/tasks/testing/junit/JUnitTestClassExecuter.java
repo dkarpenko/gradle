@@ -81,7 +81,11 @@ public class JUnitTestClassExecuter {
         }
 
         if (!options.getIncludedTests().isEmpty()) {
-            filters.add(new MethodNameFilter(options.getIncludedTests()));
+            filters.add(new MethodNameIncludeFilter(options.getIncludedTests()));
+        }
+
+        if (!options.getExcludedTests().isEmpty()) {
+            filters.add(new MethodNameExcludeFilter(options.getExcludedTests()));
         }
 
         Request request = Request.aClass(testClass);
@@ -125,21 +129,49 @@ public class JUnitTestClassExecuter {
         return true;
     }
 
-    private static class MethodNameFilter extends org.junit.runner.manipulation.Filter {
+    private static class MethodNameIncludeFilter extends MethodNameFilter {
 
-        private final TestSelectionMatcher matcher;
-
-        public MethodNameFilter(Iterable<String> includedTests) {
-            matcher = new TestSelectionMatcher(includedTests);
+        public MethodNameIncludeFilter(Iterable<String> includedTests) {
+            super(includedTests);
         }
 
         @Override
         public boolean shouldRun(Description description) {
-            return matcher.matchesTest(JUnitTestEventAdapter.className(description), JUnitTestEventAdapter.methodName(description));
+            return matchCheck(description);
         }
 
         public String describe() {
             return "Includes matching test methods";
         }
+    }
+
+    private static class MethodNameExcludeFilter extends MethodNameFilter{
+
+        public MethodNameExcludeFilter(Iterable<String> includedTests) {
+            super(includedTests);
+        }
+
+        @Override
+        public boolean shouldRun(Description description) {
+            return !matchCheck(description);
+        }
+
+        public String describe() {
+            return "Excludes matching test methods";
+        }
+    }
+
+    private static abstract class MethodNameFilter extends org.junit.runner.manipulation.Filter {
+        protected final TestSelectionMatcher matcher;
+
+        public MethodNameFilter(Iterable<String> includedTests) {
+            matcher = new TestSelectionMatcher(includedTests);
+        }
+
+        protected boolean matchCheck(Description description) {
+            return matcher.matchesTest(JUnitTestEventAdapter.className(description), JUnitTestEventAdapter.methodName(description));
+        }
+
+
     }
 }
