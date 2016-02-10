@@ -50,7 +50,7 @@ public class MethodOptionElement extends AbstractOptionElement {
         if (parameterValues.size() == 0) {
             invokeMethod(object, method, true);
         } else if (parameterValues.size() > 1) {
-            throw new IllegalArgumentException(String.format("Lists not supported for option."));
+            invokeMethod(object, method, parameterValues);
         } else {
             invokeMethod(object, method, getNotationParser().parseNotation(parameterValues.get(0)));
         }

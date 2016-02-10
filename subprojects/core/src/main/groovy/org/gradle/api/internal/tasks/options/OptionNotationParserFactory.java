@@ -38,6 +38,12 @@ public class OptionNotationParserFactory {
             return new NotationConverterToNotationParserAdapter<CharSequence, T>(converter);
         }
 
+        // There is some misleading naming over this functionality: targetType - is the type of option, but parser is required
+        // for every single option passed via command line
+        if(targetType == java.util.List.class){
+            return Cast.uncheckedCast(new NoDescriptionValuesJustReturningParser());
+        }
+
         throw new OptionValidationException(String.format("Don't know how to convert strings to type '%s'.", targetType.getName()));
     }
 
